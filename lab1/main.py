@@ -35,23 +35,32 @@ def main():
     countries = process_data(raw_data)
 
     matched_countries = dict()
-    while len(matched_countries) != 1 and len(headers) != 0:
+    search_criteria = dict()
 
-        search_criteria = dict()
+    attempt_count = 0
+
+    while len(matched_countries) != 1 and attempt_count < 4:
         for header in headers:
-            parameter = input(f'Enter parameter "{header}" or leave it empty: ')
+            if search_criteria.get(header) is None:
+                parameter = input(f'Enter parameter "{header}" or leave it empty: ')
+            else:
+                parameter = input(f'Parameter "{header}" has been set to "{search_criteria[header]}". Enter value to overwrite it: ')
             if parameter:
                 search_criteria[header] = parameter
+
         matched_countries = dict()
         for country in countries:
-            for k, v in search_criteria.items():
-                if country[k] == v:
-                    matched_countries[country['name']] = country
+            if all(country[k] == v for k, v in search_criteria.items()):
+                matched_countries[country['name']] = country
 
         if len(matched_countries) != 1:
             print(f'{len(matched_countries)} countries match parameters\n{search_criteria}. Please clarify your search\n')
+            attempt_count += 1
 
-    print(f'Found country {list(matched_countries.keys())[0]}')
+    if attempt_count == 4:
+        print('Failed to find a country')
+    else:
+        print(f'Found country {list(matched_countries.keys())[0]}')
 
 
 if __name__ == '__main__':
