@@ -1,0 +1,21 @@
+name,capital,population,area,gdp,country_code,phone_code,currency,leader,domain,hdi
+Ukraine,Kiev,41588354,603548,4940,ua,+380,UAH,Zelenskiy,ua,0.779
+Poland,Warsaw,38265000,312679,16179,pl,+48,PLN,Duda,pl,0.864
+Slovakia,Bratislava,5456000,49036,16441,svk,+421,EUR,Chaputova,sk,0.860
+Czech Republic,Prague,10637540,78866,18579,cze,+420,CZK,Zeman,cz,0.891
+Estonia,Tallinn,1340194,45226,17802,ee,+372,EUR,Karis,ee,0.892
+Latvia,Riga,1907675,64589,15662,lv,+371,EUR,Levits,lv,0.866
+Lithuania,Vilnius,2784279,65300,22752,lt,+370,EUR,Nauseda,lt,0.882
+Finland,Helsinki,5457429,338145,44491,fl,+358,EUR,Niynitse,fl,0.892
+Norway,Oslo,5391369,385207,72305,no,+47,NOK,Garald,no,0.954
+Sweden,Stockholm,9354462,449964,49582,se,+46,SEK,Gustav,se,0.898
+Germany,Berlin,83019200,357578,44550,de,+49,EUR,Scholz,de,0.926
+United Kingdom,London,55977178,130279,40284,gb,+44,GBP,Elizabeth,uk,0.932
+Spain,Barcelona,47500000,504645,40139,es,+34,EUR,Sanchez,es,0.884
+Portugal,Lisbon,10374822,92391,32006,pt,+351,EUR,DeSoza,pt,0.864
+Austria,Vienna,8857960,83871,43570,at,+43,EUR,Negammer,at,0.951
+Hungary,Budapest,9772561,93030,16723,hun,+36,HUF,Orban,hu,0.836
+Italy,Rome,60588306,301338,35913,ita,+39,EUR,Dragi,it,0.892
+France,Paris,66842134,671308,42878,fra,+33,EUR,Macron,fr,0.901
+Turkey,Istanbul,80810525,783356,11114,tur,+90,TRY,Erdogan,tr,0.820
+Greece,Athens,10768477,131957,20570,grc,+30,EUR,Sakellaropulu,gr,0.888
