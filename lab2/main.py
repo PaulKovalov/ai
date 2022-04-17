@@ -1,28 +1,94 @@
 import random
 from typing import List, Tuple
+from os.path import exists
 
+
+EPOCHS = 2000
+BEST_THRESHOLD = 30
+MUTATION_COUNT = 10
+PLANE_DIMENSION = 50
 OBSTACLE = '#'
 FREE = '.'
-PLANE_DIMENSION = 100
-EPOCHS = 200
-BEST_THRESHOLD = 24
-MUTATION_COUNT = 5
 
 
-def generate_plane(filename):
-    with open(filename, 'w') as file:
-        for _ in range(PLANE_DIMENSION):
+class Plane:
+    @staticmethod
+    def _generate_plane(filename):
+        with open(filename, 'w') as file:
             for _ in range(PLANE_DIMENSION):
-                cell = random.randint(0, 2)
-                file.write('#' if cell == 1 else '.')
-            file.write('\n')
+                for _ in range(PLANE_DIMENSION):
+                    cell = random.randint(0, 3)
+                    file.write(OBSTACLE if cell == 1 else FREE)
+                file.write('\n')
 
+    @staticmethod
+    def _load_plane(filename):
+        with open(filename, 'r') as file:
+            rows = file.readlines()
+            rows = [row.strip() for row in rows]
+            return rows
 
-def load_plane():
-    with open('plane.txt', 'r') as file:
-        rows = file.readlines()
-        rows = [row.strip() for row in rows]
-        return rows
+    def __init__(self, plane_file):
+        if not exists(plane_file):
+            print(f'File {plane_file} not found, generating one...')
+            self._generate_plane(filename=plane_file)
+        self.plane = self._load_plane(filename=plane_file)
+        if len(self.plane) != PLANE_DIMENSION:
+            raise ValueError('PLANE_DIMENSION is different from loaded from file')
+
+        self.free_segments = []
+        for i in range(PLANE_DIMENSION):
+            row_free_segments = []
+            segment_start = 0
+            segment_end = -1
+            for j in range(PLANE_DIMENSION):
+                if self.plane[i][j] == FREE:
+                    segment_end = j
+                else:
+                    if segment_start <= segment_end:
+                        row_free_segments.append((segment_start, segment_end))
+                    segment_start = j + 1
+            self.free_segments.append(row_free_segments)
+
+    @staticmethod
+    def _intersects(segment1, segment2):
+        if segment1[0] <= segment2[1] and segment2[0] <= segment1[1]:
+            return True
+        return False
+
+    def _dfs(self, segment):
+        stack = [(segment, 0, [])]
+        while stack:
+            curr_segment, curr_row, path = stack.pop()
+            if curr_row == PLANE_DIMENSION:
+                return path, True
+            for segment in self.free_segments[curr_row]:
+                if self._intersects(curr_segment, segment):
+                    next_point = (curr_row, random.randint(segment[0], segment[1]))
+                    stack.append((segment, curr_row + 1, path + [next_point]))
+        return [], False
+
+    def generate_random_path(self, i):
+        # From every i try to build random path to the end of the plane
+        # Initial segment which intersects with i:
+        return self._dfs((i, i))
+
+    def print_path(self, path):
+        char_plane = []
+        for row in self.plane:
+            r = []
+            for char in row:
+                r.append(char)
+            char_plane.append(r)
+        for p in path[0]:
+            char_plane[p[0]][p[1]] = 'P'
+        with open(f'generated-path-{EPOCHS}.txt', 'w') as file:
+            file.write(f'Path length is {path[1]}\n')
+            for line in char_plane:
+                for char in line:
+                    file.write(char)
+                file.write('\n')
+            file.flush()
 
 
 # Cost of the route, the less cost - the better fit
@@ -31,36 +97,6 @@ def fitness_function(path: List[Tuple[int, int]]) -> int:
     for i in range(1, len(path)):
         cost += abs(path[i][1] - path[i - 1][1])
     return cost
-
-
-def generate_random_path(plane, i: int) -> Tuple[List[Tuple[int, int]], bool]:
-    path = []
-    for j in range(PLANE_DIMENSION):
-        # If the next cell is free, advance
-        if plane[j][i] == FREE:
-            path.append((j, i))
-        # The next cell is obstacle, move back, and find path left or right
-        else:
-            # Choose randomly direction where to go - left/right
-            direction = random.randint(0, 1)
-            if direction == 0:
-                # Go left
-                while i >= 0:
-                    if plane[j][i] == FREE:
-                        break
-                    i -= 1
-                if i < 0:
-                    return path, False
-            if direction == 1:
-                # Go right
-                while i < PLANE_DIMENSION:
-                    if plane[j][i] == FREE:
-                        break
-                    i += 1
-                if i >= PLANE_DIMENSION:
-                    return path, False
-            path.append((j, i))
-    return path, True
 
 
 def cross(path1, path2, plane):
@@ -75,24 +111,8 @@ def cross(path1, path2, plane):
     return successful_crosses
 
 
-def print_path(path, plane):
-    char_plane = []
-    for row in plane:
-        r = []
-        for char in row:
-            r.append(char)
-        char_plane.append(r)
-    for p in path:
-        char_plane[p[0]][p[1]] = 'P'
-    with open('generated-path.txt', 'w') as file:
-        for line in char_plane:
-            for char in line:
-                file.write(char)
-            file.write('\n')
-        file.flush()
-
-
 def run_simulation(population, plane):
+    print(f'Starting from {len(population)} elements of the initial population')
     # Start algorithm
     for epoch in range(EPOCHS):
         if epoch % 100 == 0:
@@ -104,15 +124,15 @@ def run_simulation(population, plane):
             j = random.randint(0, BEST_THRESHOLD - 1)
             while j == i:
                 j = random.randint(0, BEST_THRESHOLD - 1)
-            crossed.extend(cross(population[i], population[j], plane))
+            crossed.extend(cross(population[i], population[j], plane.plane))
         # Self check
         for path in crossed:
-            if not all(plane[x][y] == FREE for x, y in path):
+            if not all(plane.plane[x][y] == FREE for x, y in path):
                 print('WTF')
 
         # Step 2: Mutation. Add a certain number of random paths, and remove the same number of random paths.
         for _ in range(MUTATION_COUNT):
-            random_path, generated = generate_random_path(plane, random.randint(0, PLANE_DIMENSION - 1))
+            random_path, generated = plane.generate_random_path(random.randint(0, PLANE_DIMENSION - 1))
             if generated:
                 crossed.append(random_path)
 
@@ -124,21 +144,18 @@ def run_simulation(population, plane):
         population = population[:BEST_THRESHOLD]
 
     # End of algorithm. Select the best path and print it on the board
-    print(population[0][0])
-    print(population[0][1])
-    print_path(population[0][0], plane)
+    plane.print_path(population[0])
 
 
 def main():
-    plane = load_plane()
+    plane = Plane('plane.txt')
     # Generate initial population
     population = []
     for i in range(PLANE_DIMENSION):
-        p, valid = generate_random_path(plane, i)
+        p, valid = plane.generate_random_path(i)
         if valid:
             population.append((p, fitness_function(p)))
     # Launch genetic algorithm
-    print(f'Generated {len(population)} elements of the initial population')
     run_simulation(population, plane)
 
 
