@@ -3,9 +3,10 @@ from typing import List, Tuple
 from os.path import exists
 
 
-EPOCHS = 2000
+EPOCHS = 20000
 BEST_THRESHOLD = 30
-MUTATION_COUNT = 10
+MUTATION_COUNT = 15
+GEN_REASSEMBLY_COUNT = 15
 PLANE_DIMENSION = 50
 OBSTACLE = '#'
 FREE = '.'
@@ -111,6 +112,20 @@ def cross(path1, path2, plane):
     return successful_crosses
 
 
+def mutate(path, plane):
+    genes_to_change = random.sample(range(PLANE_DIMENSION), GEN_REASSEMBLY_COUNT)
+    for gen in genes_to_change:
+        point = path[gen][1]
+        p_segment = (point, point)
+        whole_segment = None
+        for s in plane.free_segments[gen]:
+            if plane._intersects(s, p_segment):
+                whole_segment = s
+                break
+        new_point = random.randint(whole_segment[0], whole_segment[1])
+        path[gen] = (gen, new_point)
+
+
 def run_simulation(population, plane):
     print(f'Starting from {len(population)} elements of the initial population')
     # Start algorithm
@@ -130,11 +145,9 @@ def run_simulation(population, plane):
             if not all(plane.plane[x][y] == FREE for x, y in path):
                 print('WTF')
 
-        # Step 2: Mutation. Add a certain number of random paths, and remove the same number of random paths.
-        for _ in range(MUTATION_COUNT):
-            random_path, generated = plane.generate_random_path(random.randint(0, PLANE_DIMENSION - 1))
-            if generated:
-                crossed.append(random_path)
+        # Step 2: Mutation. Change a certain number of paths randomly.
+        for path in random.sample(crossed, MUTATION_COUNT):
+            mutate(path, plane)
 
         # Step 3: Calculate target function for all generations
         population = [(p, fitness_function(p)) for p in crossed]
