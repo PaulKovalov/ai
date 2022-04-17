@@ -3,10 +3,10 @@ from typing import List, Tuple
 from os.path import exists
 
 
-EPOCHS = 20000
-BEST_THRESHOLD = 30
-MUTATION_COUNT = 15
-GEN_REASSEMBLY_COUNT = 15
+EPOCHS = 5000
+BEST_THRESHOLD = 24
+MUTATION_COUNT = 8
+GEN_REASSEMBLY_COUNT = 5
 PLANE_DIMENSION = 50
 OBSTACLE = '#'
 FREE = '.'
@@ -161,6 +161,7 @@ def run_simulation(population, plane):
 
 
 def main():
+    random.seed()
     plane = Plane('plane.txt')
     # Generate initial population
     population = []
