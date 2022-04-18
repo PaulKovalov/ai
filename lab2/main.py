@@ -3,10 +3,12 @@ from typing import List, Tuple
 from os.path import exists
 
 
-EPOCHS = 5000
+EPOCHS = 2000
 BEST_THRESHOLD = 24
-MUTATION_COUNT = 8
-GEN_REASSEMBLY_COUNT = 5
+MAX_MUTATION_COUNT = 10
+MIN_MUTATION_COUNT = 1
+MAX_GEN_REASSEMBLY_COUNT = 10
+MIN_GEN_REASSEMBLY_COUNT = 1
 PLANE_DIMENSION = 50
 OBSTACLE = '#'
 FREE = '.'
@@ -113,7 +115,8 @@ def cross(path1, path2, plane):
 
 
 def mutate(path, plane):
-    genes_to_change = random.sample(range(PLANE_DIMENSION), GEN_REASSEMBLY_COUNT)
+    genes_to_change = random.sample(range(PLANE_DIMENSION),
+                                    random.randint(MIN_GEN_REASSEMBLY_COUNT, MAX_GEN_REASSEMBLY_COUNT))
     for gen in genes_to_change:
         point = path[gen][1]
         p_segment = (point, point)
@@ -146,7 +149,7 @@ def run_simulation(population, plane):
                 print('WTF')
 
         # Step 2: Mutation. Change a certain number of paths randomly.
-        for path in random.sample(crossed, MUTATION_COUNT):
+        for path in random.sample(crossed, random.randint(MIN_MUTATION_COUNT, MAX_MUTATION_COUNT)):
             mutate(path, plane)
 
         # Step 3: Calculate target function for all generations
