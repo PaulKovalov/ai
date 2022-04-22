@@ -101,7 +101,7 @@ def train(datasets):
     hidden_nodes = 150
     output_nodes = len(datasets)
     learning_grade = 0.2
-    training_epochs = 150
+    training_epochs = 175
     n = NeuralNetwork(input_nodes, hidden_nodes, output_nodes, learning_grade)
     for e in range(training_epochs):
         print(f'Training epoch {e}')
@@ -119,17 +119,16 @@ if __name__ == "__main__":
 
     datasets = ['add', 'dec', 'div', 'eq', 'mul', 'sub']
     # train(datasets)
-    #
+
     input_nodes = 2500
     hidden_nodes = 150
     output_nodes = len(datasets)
     learning_grade = 0.2
     n = NeuralNetwork(input_nodes, hidden_nodes, output_nodes, learning_grade)
     n.load()
+
     for d in datasets:
-        # pick a couple of random images and make sure they are properly recognized
-        img = random.choice(os.listdir(f'dataset/{d}'))
-        img_path = f'dataset/{d}/{img}'
+        img_path = f'tests/{d}.jpg'
         img_data = get_image_data(img_path)
         p = n.query(img_data).flatten()
         index_max = int(np.argmax(p))
