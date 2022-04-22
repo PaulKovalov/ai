@@ -3,7 +3,7 @@ from typing import List, Tuple
 from os.path import exists
 
 
-EPOCHS = 2000
+EPOCHS = 10000
 BEST_THRESHOLD = 24
 MAX_MUTATION_COUNT = 10
 MIN_MUTATION_COUNT = 1
